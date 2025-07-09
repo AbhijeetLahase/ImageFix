@@ -1,8 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const fs = require('fs');
+const axios = require('axios');
+const FormData = require('form-data');
 
 const { handleImageUpload } = require('../controllers/imageController');
+
+// Move this block to the top, before any route uses `upload`
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
+});
+const upload = multer({ storage });
 
 router.post('/enhance', upload.single('image'), async (req, res) => {
   try {
@@ -27,14 +37,6 @@ router.post('/enhance', upload.single('image'), async (req, res) => {
     res.status(500).json({ error: 'Failed to enhance image' });
   }
 });
-
-
-const storage = multer.diskStorage({
-  destination: 'uploads/',
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
-});
-
-const upload = multer({ storage });
 
 router.post('/upload', upload.single('image'), handleImageUpload);
 

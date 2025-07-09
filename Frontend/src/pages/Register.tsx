@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 const Register: React.FC = () => {
   const [name, setName] = useState('');
@@ -11,7 +10,8 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
-  const { register, loading } = useAuth();
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,15 +33,28 @@ const Register: React.FC = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
-      const success = await register(name, email, password);
-      if (success) {
-        navigate('/dashboard');
-      } else {
-        setError('Failed to create account. Please try again.');
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+
+      if (!response.ok) {
+        setError(data.message || 'Failed to register');
+        return;
       }
+
+      navigate('/dashboard');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error(err);
+      setError('Something went wrong. Please try again.');
+      setLoading(false);
     }
   };
 

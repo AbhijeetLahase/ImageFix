@@ -1,5 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Sparkles, Download, RotateCcw, Loader2, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Upload,
+  Sparkles,
+  Download,
+  RotateCcw,
+  Loader2,
+  Image as ImageIcon,
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface EnhancedImage {
   id: string;
@@ -14,6 +22,15 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  // Check authentication
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      navigate('/login'); // redirect if not logged in
+    }
+  }, [navigate]);
 
   const handleFileSelect = (file: File) => {
     if (file && file.type.startsWith('image/')) {
@@ -47,23 +64,18 @@ const Dashboard: React.FC = () => {
     if (!selectedImage) return;
 
     setLoading(true);
-    
-    // Simulate AI enhancement process
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // For demo purposes, we'll use the same image as "enhanced"
-    // In a real app, this would be the result from the AI service
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     setEnhancedImage(selectedImage);
     setLoading(false);
 
-    // Save to history (in real app, this would be saved to backend)
     const enhancement: EnhancedImage = {
       id: Date.now().toString(),
       original: selectedImage,
       enhanced: selectedImage,
       timestamp: new Date(),
     };
-    
+
     const history = JSON.parse(localStorage.getItem('enhancement_history') || '[]');
     history.unshift(enhancement);
     localStorage.setItem('enhancement_history', JSON.stringify(history));
@@ -77,7 +89,7 @@ const Dashboard: React.FC = () => {
 
   const handleDownload = () => {
     if (!enhancedImage) return;
-    
+
     const link = document.createElement('a');
     link.href = enhancedImage;
     link.download = 'enhanced-photo.jpg';
@@ -96,8 +108,8 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
 
+        {/* Upload or Enhance */}
         {!selectedImage ? (
-          /* Upload Section */
           <div className="max-w-2xl mx-auto">
             <div
               className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
@@ -112,21 +124,21 @@ const Dashboard: React.FC = () => {
               <div className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
                 <Upload className="h-12 w-12 text-blue-600" />
               </div>
-              
+
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 Drop your image here
               </h3>
               <p className="text-gray-600 mb-6">
                 or click to browse from your device
               </p>
-              
+
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
               >
                 Choose File
               </button>
-              
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -134,18 +146,15 @@ const Dashboard: React.FC = () => {
                 onChange={(e) => e.target.files && handleFileSelect(e.target.files[0])}
                 className="hidden"
               />
-              
+
               <p className="text-sm text-gray-500 mt-4">
                 Supports JPG, PNG, and WEBP files up to 10MB
               </p>
             </div>
           </div>
         ) : (
-          /* Enhancement Section */
           <div className="space-y-8">
-            {/* Image Comparison */}
             <div className="grid md:grid-cols-2 gap-8">
-              {/* Original Image */}
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div className="p-4 border-b border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
@@ -155,16 +164,11 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="p-6">
                   <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                    <img
-                      src={selectedImage}
-                      alt="Original"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={selectedImage} alt="Original" className="w-full h-full object-cover" />
                   </div>
                 </div>
               </div>
 
-              {/* Enhanced Image */}
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div className="p-4 border-b border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
@@ -181,11 +185,7 @@ const Dashboard: React.FC = () => {
                         <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
                       </div>
                     ) : enhancedImage ? (
-                      <img
-                        src={enhancedImage}
-                        alt="Enhanced"
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={enhancedImage} alt="Enhanced" className="w-full h-full object-cover" />
                     ) : (
                       <div className="text-center text-gray-400">
                         <Sparkles className="h-12 w-12 mx-auto mb-2" />
@@ -197,7 +197,6 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               {!enhancedImage && !loading && (
                 <button
@@ -208,7 +207,7 @@ const Dashboard: React.FC = () => {
                   <span>Enhance Photo</span>
                 </button>
               )}
-              
+
               {enhancedImage && (
                 <button
                   onClick={handleDownload}
@@ -218,7 +217,7 @@ const Dashboard: React.FC = () => {
                   <span>Download Enhanced</span>
                 </button>
               )}
-              
+
               <button
                 onClick={handleReset}
                 className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2"

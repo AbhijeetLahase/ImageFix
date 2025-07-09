@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const { login, loading } = useAuth();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,15 +19,32 @@ const Login: React.FC = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
-      const success = await login(email, password);
-      if (success) {
-        navigate('/dashboard');
-      } else {
-        setError('Invalid email or password');
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      console.log(response);
+
+      const data = await response.json();
+      setLoading(false);
+
+      if (!response.ok) {
+        setError(data.message || 'Invalid email or password');
+        return;
       }
+
+      // Optionally store user info or token
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      navigate('/dashboard');
     } catch (err) {
+      console.error('Login error:', err);
       setError('An error occurred. Please try again.');
+      setLoading(false);
     }
   };
 

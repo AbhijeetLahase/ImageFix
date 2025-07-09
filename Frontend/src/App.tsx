@@ -14,7 +14,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="min-h-screen bg-gray-50">
-          <Navigation />
+          {/* <Navigation /> */}
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
@@ -22,9 +22,9 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                // <ProtectedRoute>
                   <Dashboard />
-                </ProtectedRoute>
+                // {</ProtectedRoute>}
               }
             />
             <Route
