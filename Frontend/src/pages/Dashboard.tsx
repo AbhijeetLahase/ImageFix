@@ -9,6 +9,9 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import { useAuth } from '../contexts/AuthContext';
+
+
 
 interface EnhancedImage {
   id: string;
@@ -24,6 +27,7 @@ const Dashboard: React.FC = () => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Check authentication
   useEffect(() => {
@@ -62,7 +66,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleEnhance = async () => {
-    if (!selectedImage) return;
+    if (!selectedImage || !user) return;
 
     setLoading(true);
 
@@ -71,24 +75,27 @@ const Dashboard: React.FC = () => {
     const blob = await res.blob();
     const formData = new FormData();
     formData.append('file', blob, 'input.png');
+    formData.append('userId', user.id);
+    console.log('User ID sending to backend:', user?.id);
+
 
     try {
-      const response = await fetch('http://localhost:8001/enhance', {
+      const response = await fetch('http://localhost:5000/api/image/enhance', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) throw new Error('Enhancement failed');
 
-      const enhancedBlob = await response.blob();
-      const enhancedUrl = URL.createObjectURL(enhancedBlob);
-      setEnhancedImage(enhancedUrl);
+      // Expect JSON with { cloudinaryUrl }
+      const data = await response.json();
+      setEnhancedImage(data.cloudinaryUrl);
 
       // Save to history
       const enhancement: EnhancedImage = {
         id: Date.now().toString(),
         original: selectedImage,
-        enhanced: enhancedUrl,
+        enhanced: data.cloudinaryUrl,
         timestamp: new Date(),
       };
       const history = JSON.parse(localStorage.getItem('enhancement_history') || '[]');

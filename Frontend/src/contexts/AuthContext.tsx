@@ -37,43 +37,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock validation - in real app, this would be an API call
-    const mockUser = {
-      id: '1',
-      email,
-      name: email.split('@')[0],
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('smartphotofix_user', JSON.stringify(mockUser));
+const login = async (email: string, password: string): Promise<boolean> => {
+  setLoading(true);
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!response.ok) throw new Error('Login failed');
+    const data = await response.json();
+    setUser(data.user);
+    localStorage.setItem('smartphotofix_user', JSON.stringify(data.user));
     setLoading(false);
     return true;
-  };
+  } catch (err) {
+    setLoading(false);
+    return false;
+  }
+};
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    setLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock registration - in real app, this would be an API call
-    const newUser = {
-      id: Math.random().toString(36).substr(2, 9),
-      email,
-      name,
-    };
-    
-    setUser(newUser);
-    localStorage.setItem('smartphotofix_user', JSON.stringify(newUser));
+const register = async (name: string, email: string, password: string): Promise<boolean> => {
+  setLoading(true);
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    });
+    if (!response.ok) throw new Error('Registration failed');
+    const data = await response.json();
+    setUser(data.user);
+    localStorage.setItem('smartphotofix_user', JSON.stringify(data.user));
     setLoading(false);
     return true;
-  };
+  } catch (err) {
+    setLoading(false);
+    return false;
+  }
+};
 
   const logout = () => {
     setUser(null);
