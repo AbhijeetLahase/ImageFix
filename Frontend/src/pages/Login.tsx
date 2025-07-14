@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); // Destructure login function from useAuth
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,25 +24,14 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      console.log(response);
-
-      const data = await response.json();
+      const success = await login(email, password);
       setLoading(false);
 
-      if (!response.ok) {
-        setError(data.message || 'Invalid email or password');
-        return;
+      if (success) {
+        navigate('/dashboard');
+      } else {
+        setError('Login failed. Please try again.');
       }
-
-      // Optionally store user info or token
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError('An error occurred. Please try again.');
