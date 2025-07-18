@@ -1,9 +1,12 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
 
 exports.registerUser = async (req, res) => {
   const { name, email, password } = req.body;
- console.log(req.body)
+  console.log(req.body)
   // Validate input
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -27,8 +30,22 @@ exports.registerUser = async (req, res) => {
     });
 
     await user.save();
+    const token = jwt.sign(
+      { userId: user._id },             // Payload
+      process.env.JWT_SECRET,          // Secret key (stored in .env)
+      { expiresIn: '7d' }              // Optional: token expiry
+    );
 
-    return res.status(201).json({ message: 'User registered successfully' });
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      },
+      token
+    });
+
+    // return res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error('Register error:', err);
     return res.status(500).json({ message: 'Server error' });
@@ -39,7 +56,6 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate input
   if (!email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
@@ -55,10 +71,25 @@ exports.loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // For now, just return success (you can add JWT/token later)
-    return res.status(200).json({ message: 'Login successful', user: { name: user.name, email: user.email } });
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return res.status(200).json({
+      message: 'Login successful',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      },
+      token
+    });
+
   } catch (err) {
     console.error('Login error:', err);
     return res.status(500).json({ message: 'Server error' });
   }
 };
+

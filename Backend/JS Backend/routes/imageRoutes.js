@@ -5,6 +5,7 @@ const fs = require('fs');
 const axios = require('axios');
 const FormData = require('form-data');
 const cloudinary = require('cloudinary').v2;
+const verifyToken = require('../middlewares/authMiddleware');
 
 
 const { handleImageUpload } = require('../controllers/imageController');
@@ -16,8 +17,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.post('/enhance', upload.single('file'), async (req, res) => {
-    console.log('POST /enhance called');
+router.post('/enhance', verifyToken, upload.single('file'), async (req, res) => {
+  console.log('POST /enhance called');
   console.log('File:', req.file);
   console.log('User ID:', req.body.userId);
   try {

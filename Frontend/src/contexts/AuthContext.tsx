@@ -49,6 +49,7 @@ const login = async (email: string, password: string): Promise<boolean> => {
     const data = await response.json();
     setUser(data.user);
     localStorage.setItem('smartphotofix_user', JSON.stringify(data.user));
+    localStorage.setItem('smartphotofix_token', data.token); // ⬅️ Save JWT token
     setLoading(false);
     return true;
   } catch (err) {
@@ -69,6 +70,7 @@ const register = async (name: string, email: string, password: string): Promise<
     const data = await response.json();
     setUser(data.user);
     localStorage.setItem('smartphotofix_user', JSON.stringify(data.user));
+    localStorage.setItem('smartphotofix_token', data.token); // ⬅️ Save JWT token
     setLoading(false);
     return true;
   } catch (err) {
@@ -80,6 +82,7 @@ const register = async (name: string, email: string, password: string): Promise<
   const logout = () => {
     setUser(null);
     localStorage.removeItem('smartphotofix_user');
+    localStorage.removeItem('smartphotofix_token'); 
   };
 
   const value = {
