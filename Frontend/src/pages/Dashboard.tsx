@@ -31,7 +31,11 @@ const Dashboard: React.FC = () => {
 
   // Check authentication
   useEffect(() => {
-    const user = localStorage.getItem('user');
+    const savedUser = sessionStorage.getItem('smartphotofix_user');
+    if (!savedUser) {
+      navigate('/login');
+    }
+
     if (!user) {
       navigate('/login'); // redirect if not logged in
     }
@@ -75,12 +79,13 @@ const Dashboard: React.FC = () => {
     const blob = await res.blob();
     const formData = new FormData();
     formData.append('file', blob, 'input.png');
-    formData.append('userId', user.id);
+    // formData.append('userId', user.id);
     console.log('User ID sending to backend:', user?.id);
 
 
     try {
-      const token = localStorage.getItem('smartphotofix_token');
+      const token = sessionStorage.getItem('smartphotofix_token');
+
       const response = await fetch('http://localhost:5000/api/image/enhance', {
         method: 'POST',
         headers: {

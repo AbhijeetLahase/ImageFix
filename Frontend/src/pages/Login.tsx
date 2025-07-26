@@ -15,7 +15,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
+    
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
@@ -29,9 +29,7 @@ const Login: React.FC = () => {
       // setLoading(false);
       console.log('Login result:', success); 
       if (success) {
-
         navigate('/dashboard');
-
       } else {
         console.log('Login failed. Please try again.');
       }

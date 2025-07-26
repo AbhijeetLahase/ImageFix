@@ -1,50 +1,39 @@
-const axios = require('axios');
 const fs = require('fs');
-const { cloudinary } = require('../config/cloudinary');
-const Image = require('../models/Image');
-const FormData = require('form-data'); // ✅ Must be added
-const path = require('path');   
+const axios = require('axios');
+const FormData = require('form-data');
+const cloudinary = require('cloudinary').v2;
 
 exports.handleImageUpload = async (req, res) => {
   try {
-    // 1. Prepare form-data to send to ML API
+    const imagePath = req.file.path;
+    const userId = req.userId || 'anonymous'; // From token
+
+    // 1. Send to FastAPI for enhancement
     const form = new FormData();
-    form.append('file', fs.createReadStream(req.file.path));
+    form.append('file', fs.createReadStream(imagePath));
 
-    // 2. Call ML API
-    const response = await axios.post(
-      process.env.ML_API_URL,
-      form,
-      {
-        headers: form.getHeaders(),
-        responseType: 'stream', // 👈 VERY important
-      }
-    );
-
-    // 3. Save the response stream to a temp file
-    const enhancedPath = path.join('uploads', 'enhanced_' + Date.now() + '.jpg');
-    const writer = fs.createWriteStream(enhancedPath);
-
-    response.data.pipe(writer);
-
-    writer.on('finish', async () => {
-      // 4. Upload the enhanced image to Cloudinary
-      const cloudinaryResult = await cloudinary.uploader.upload(enhancedPath);
-
-      // 5. Cleanup temp files
-      fs.unlinkSync(req.file.path);      // original
-      fs.unlinkSync(enhancedPath);       // enhanced
-
-      // 6. Respond to client
-      res.json({ url: cloudinaryResult.secure_url });
+    const response = await axios.post('http://localhost:8001/enhance', form, {
+      headers: form.getHeaders(),
+      responseType: 'arraybuffer',
     });
 
-    writer.on('error', (err) => {
-      throw err;
+    // 2. Save enhanced image to temp
+    const enhancedPath = 'uploads/' + Date.now() + '_enhanced.png';
+    fs.writeFileSync(enhancedPath, response.data);
+
+    // 3. Upload to Cloudinary
+    const cloudinaryResult = await cloudinary.uploader.upload(enhancedPath, {
+      folder: `enhanced_images/${userId}`,
     });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Image processing failed' });
+    // 4. Cleanup
+    fs.unlinkSync(imagePath);
+    fs.unlinkSync(enhancedPath);
+
+    // 5. Respond with Cloudinary URL
+    res.json({ cloudinaryUrl: cloudinaryResult.secure_url });
+  } catch (error) {
+    console.error('Error enhancing image:', error.message);
+    res.status(500).json({ error: 'Failed to enhance image' });
   }
 };

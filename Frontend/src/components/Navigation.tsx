@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Camera, Menu, X, User, LogOut, Home, History, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from "react-router-dom";
+
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
@@ -10,10 +12,12 @@ const Navigation: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
-
+  const navigate = useNavigate();
   const handleLogout = () => {
     logout();
+    
     setIsUserMenuOpen(false);
+    navigate("/login");
   };
 
   if (!user) {
