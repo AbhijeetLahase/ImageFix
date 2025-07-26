@@ -24,19 +24,23 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
+  
       const success = await login(email, password);
-      setLoading(false);
-
+      // setLoading(false);
+      console.log('Login result:', success); 
       if (success) {
+
         navigate('/dashboard');
+
       } else {
-        setError('Login failed. Please try again.');
+        console.log('Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Login error:', err);
       setError('An error occurred. Please try again.');
-      setLoading(false);
+      // setLoading(false);
     }
+     setLoading(false);
   };
 
   return (

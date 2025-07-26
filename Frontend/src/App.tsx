@@ -1,7 +1,6 @@
 // import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import Navigation from './components/Navigation';
 import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -12,7 +11,6 @@ import History from './pages/History';
 function App() {
   return (
     <AuthProvider>
-      <Router>
         <div className="min-h-screen bg-gray-50">
           {/* <Navigation /> */}
           <Routes>
@@ -38,7 +36,6 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-      </Router>
     </AuthProvider>
   );
 }

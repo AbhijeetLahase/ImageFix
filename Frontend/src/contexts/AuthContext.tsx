@@ -48,7 +48,7 @@ const login = async (email: string, password: string): Promise<boolean> => {
     if (!response.ok) throw new Error('Login failed');
     const data = await response.json();
     setUser(data.user);
-    localStorage.setItem('smartphotofix_user', JSON.stringify(data.user));
+    localStorage.setItem('user', JSON.stringify(data.user));
     setLoading(false);
     return true;
   } catch (err) {
@@ -68,7 +68,7 @@ const register = async (name: string, email: string, password: string): Promise<
     if (!response.ok) throw new Error('Registration failed');
     const data = await response.json();
     setUser(data.user);
-    localStorage.setItem('smartphotofix_user', JSON.stringify(data.user));
+    localStorage.setItem('user', JSON.stringify(data.user));
     setLoading(false);
     return true;
   } catch (err) {
@@ -79,7 +79,7 @@ const register = async (name: string, email: string, password: string): Promise<
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('smartphotofix_user');
+    localStorage.removeItem('user');
   };
 
   const value = {
