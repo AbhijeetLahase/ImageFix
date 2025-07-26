@@ -80,8 +80,12 @@ const Dashboard: React.FC = () => {
 
 
     try {
+      const token = localStorage.getItem('smartphotofix_token');
       const response = await fetch('http://localhost:5000/api/image/enhance', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
 
