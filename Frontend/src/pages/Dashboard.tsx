@@ -123,14 +123,27 @@ const Dashboard: React.FC = () => {
     setLoading(false);
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!enhancedImage) return;
 
-    const link = document.createElement('a');
-    link.href = enhancedImage;
-    link.download = 'enhanced-photo.jpg';
-    link.click();
+    try {
+      const response = await fetch(enhancedImage);
+      const blob = await response.blob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'enhanced-photo.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url); // cleanup
+    } catch (err) {
+      console.error('Download failed:', err);
+      alert('Failed to download the image.');
+    }
   };
+
 
   return (
     <>

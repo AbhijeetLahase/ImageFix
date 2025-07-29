@@ -50,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (!response.ok) throw new Error('Login failed');
       const data = await response.json();
+      // console.log('Fetched history:', data); 
       setUser(data.user);
       setToken(data.token);
       sessionStorage.setItem('smartphotofix_user', JSON.stringify(data.user));

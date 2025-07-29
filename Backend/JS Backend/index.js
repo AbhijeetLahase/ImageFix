@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const{ connectDB} = require('./config/database.js');
 const { cloudinaryConnect } = require('./config/cloudinary');
 const authRoutes = require('./routes/authRoutes');
+
+
 dotenv.config();
 
 
