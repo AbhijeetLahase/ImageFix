@@ -1,0 +1,5 @@
+# Ignore all .env files in the repo
+.env
+*/.env
+**/.env
+Frontend/.env
